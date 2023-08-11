@@ -1,19 +1,19 @@
 import pdb
-
-#%%
 import yfinance as yf
 import numpy as np
-import pdb
-def calculator(stockName):
-    msft = yf.Ticker(stockName)
-    hist = msft.history(interval="1d", period='565d')
+import pandas as pd
+from prettytable import PrettyTable
 
-    hist= hist.reset_index()
+def calculator(stockName, period='720d'):
+
+    stock = yf.Ticker(stockName)
+
+    hist = stock.history(interval="1d", period=period)
+
+    hist = hist.reset_index()
     hist["MA_50"] = hist['Close'].rolling(window=50).mean()
     hist["MA_200"] = hist['Close'].rolling(window=200).mean()
 
-
-    #hist["ma200"] = hist['Close'].rolling(window=200).mean()
     hist['Close_vs_MA_50'] = np.where(hist['Close'] > hist['MA_50'], 'Higher', 'Lower')
     hist['Close_vs_MA_200'] = np.where(hist['Close'] > hist['MA_200'], 'Higher', 'Lower')
 
@@ -35,7 +35,6 @@ def calculator(stockName):
     firstBuyPrice= 0
     lastSellPrice = 0
 
-    import pandas as pd
     for index,row in flipDF.iterrows():
         if(not holdingStock and (row["Close_vs_MA_50"] == 'Higher'  or row["Close_vs_MA_200"] == 'Higher')):
 
@@ -53,7 +52,6 @@ def calculator(stockName):
                 if row['Open'] < row["MA_50"]:
                     # print("buying ", row[['Date', 'Close', 'MA_50']], row["Close"] / row["MA_50"])
                     price = row["MA_50"]
-                    price = row["Close"]
 
                     stockCount = initialMoney / price
                     firstBuyPrice = price if firstBuyPrice == 0 else firstBuyPrice
@@ -64,7 +62,6 @@ def calculator(stockName):
                 if row['Open'] < row["MA_200"]:
                     # print("buying " , row[['Date', 'Close', 'MA_200']], row["Close"] / row["MA_200"])
                     price = row["MA_200"]
-                    price = row["Close"]
 
                     stockCount = initialMoney / price
                     firstBuyPrice = price if firstBuyPrice == 0 else firstBuyPrice
@@ -76,7 +73,6 @@ def calculator(stockName):
             holdingStock = True
             # print("buying" , row[['Date', 'Open', 'Close', 'MA_50', 'MA_200', "Flip50"]])
         elif(holdingStock and (row["Close_vs_MA_50"] == 'Lower' or row["Close_vs_MA_200"] == 'Lower') ):
-            currentPrice = initialMoney
 
 
             if row["Flip50"]  == 'Yes' :
@@ -85,7 +81,7 @@ def calculator(stockName):
                     # print("selling  ", row[['Date', 'Close', 'Open', 'MA_50']], row["MA_50"]/row["Close"])
 
                     price = row["MA_50"]
-                    price = row["Close"]
+
                     initialMoney = price * stockCount
                     lastSellPrice = price
                 else:
@@ -97,7 +93,7 @@ def calculator(stockName):
                     # print("selling  ", row[['Date', 'Close', 'MA_200']], row["MA_200"]/row["Close"])
 
                     price = row["MA_200"]
-                    price = row["Close"]
+
                     initialMoney = price * stockCount
                     lastSellPrice = price
                 else:
@@ -112,10 +108,15 @@ def calculator(stockName):
 
     # print(firstBuyPrice)
     # print(lastSellPrice)
-    print(stockName, initialMoney - 1000, initialMoney, (initialMoney - 1000)/ 1000 * 100, (lastSellPrice - firstBuyPrice) /  firstBuyPrice * 100)
+    t = PrettyTable(['Stock', 'RoboLong', 'Buy&Hold'])
+    t.add_row([stockName, "{:.2%}".format((initialMoney - 1000)/ 1000), "{:.2%}".format((lastSellPrice - firstBuyPrice) /  firstBuyPrice)])
+    print(t)
+    # print(stockName, initialMoney - 1000, initialMoney, (initialMoney - 1000)/ 1000 * 100, (lastSellPrice - firstBuyPrice) /  firstBuyPrice * 100)
 
+sp500_df = pd.read_csv("sp500.txt", sep=",")
+stock_tickers = sp500_df["Symbol"].values
 
-#
+pdb.set_trace()
 calculator("TGT")
 calculator("ICAGY")
 calculator("AAPL")
@@ -145,15 +146,4 @@ calculator("UPST")
 calculator("GOOG")
 calculator("AMZN")
 calculator("EXPE")
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
+
