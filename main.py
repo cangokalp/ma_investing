@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from prettytable import PrettyTable
 
-def calculator(stockList, period='565d' , wantShort = False):
+def calculator(stockList, period='400d' , wantShort = False):
 
     profitList = []
     endMoneyList = []
@@ -187,12 +187,13 @@ def calculator(stockList, period='565d' , wantShort = False):
     #t.add_row([stockName, "{:.2%}".format((initialMoney - 1000)/ 1000), "{:.2%}".format((lastSellPrice - firstBuyPrice) /  firstBuyPrice)])
     #print(t)
     # print(stockName, initialMoney - 1000, initialMoney, (initialMoney - 1000)/ 1000 * 100, (lastSellPrice - firstBuyPrice) /  firstBuyPrice * 100)
+    calc_df = calc_df.sort_values(by='yakinlik', ascending=True)
     return calc_df
 
 
 ticker_list = ['TGT', 'ICAGY', 'AAPL', 'UAL', 'LULU', 'MMM', 'DIS', 'SBUX', 'LUV', 'DAL', 'U', 'UBER', 'PLTR', 'TSLA', 'UNG',
         'NVDA', 'RYCEY', 'PINS', 'NET', 'GM', 'GE', 'BA', 'INTC', 'ADBE', 'UPST', 'GOOG', 'AMZN', 'EXPE', "META", "NFLX",
-               "NET", "DDOG", 'T', 'AXP', 'UNH']
+                "DDOG", 'T', 'AXP', 'UNH']
 
 
 calc_df = calculator(ticker_list)
